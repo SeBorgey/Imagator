@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 
 
 warnings.filterwarnings("ignore")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 imsize = config.imsize
 
 cnn_normalization_mean = torch.tensor([0.485, 0.456, 0.406]).to(device)
@@ -20,7 +20,7 @@ cnn_normalization_std = torch.tensor([0.229, 0.224, 0.225]).to(device)
 
 unloader = transforms.ToPILImage()
 loader = transforms.Compose([
-        transforms.Resize(imsize),
+        transforms.Resize((imsize, imsize)),
         transforms.ToTensor()])
 
 
@@ -32,8 +32,9 @@ def download_cnn():
 def image_loader(name, size):
     # image = Image.fromstring('RGB', size, byte_image)
     image = Image.open(name)
+    print(image.size)
     image = loader(image).unsqueeze(0)
-    print('photo readed ok')
+    print(image.shape)
     os.remove(name)
     return image.to(device, torch.float)
 
@@ -149,7 +150,7 @@ def get_input_optimizer(input_img):
 
 def run_style_transfer(cnn, name,
                        content_img_size, style_img_size,
-                       num_steps=75,
+                       num_steps=100,
                        style_weight=2e4, content_weight=1):
 
     style_img = image_loader(name+'_style_photo.pickle', style_img_size)
